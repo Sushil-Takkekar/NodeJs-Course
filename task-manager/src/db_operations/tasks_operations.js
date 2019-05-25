@@ -12,15 +12,17 @@ const create_task = (task) => {
 }
 
 // get all tasks of a user
-const get_all_tasks = (owner, status) => {
+const get_all_tasks = ({ owner, status, limit, skip, sortBy }) => {
     return new Promise((resolve, reject) => {
-        const filter = {
-            owner
-        }
+        const filter = { owner };
+        const sort = {};
         if(status) {
             filter.completed = status === "true";
         }
-        task_schema.find(filter).then((data) => {
+        if(sortBy) {
+            sort[sortBy.split('_')[0]] = (sortBy.split('_')[1] === 'asc' ? 1:-1);   // set sorting criteria => Ex. sort: { createdAt : 1 }
+        }
+        task_schema.find(filter, null, { limit, skip, sort }).then((data) => {
             resolve(data);
         }).catch((err) => {
             reject(err);
@@ -61,7 +63,7 @@ const delete_task = (id, owner) => {
                 return resolve({ Error : 'No such task exists !' });
             resolve({ msg: 'Task deleted sucessfully !' });
         }).catch((err) => {
-            reject(err);
+            reject({ Error : 'No such task exists !' });
         });
     });
 }

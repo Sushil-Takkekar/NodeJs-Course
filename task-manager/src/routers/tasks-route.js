@@ -17,7 +17,14 @@ router.post('/tasks', auth, (req, res) => {
 
 // get all tasks (filter allowed => /tasks?completed=false)
 router.get('/tasks', auth, (req, res) => {
-    tasks.get_all_tasks(req.user._id, req.query.completed).then((data) => {
+    const params = {
+        owner : req.user._id,
+        status : req.query.completed,
+        limit : parseInt(req.query.limit), // used for pagination
+        skip : parseInt(req.query.skip), // used for pagination
+        sortBy : req.query.sortBy
+    }
+    tasks.get_all_tasks(params).then((data) => {
         res.status(200).send(data);
     }).catch((err) => {
         res.status(500).send(err);
