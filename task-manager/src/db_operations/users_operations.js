@@ -3,6 +3,7 @@ const user_model_schema = require('../models/user_model');
 const task_model_schema = require('../models/task_model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const sharp = require('sharp');
 
 // create new user
 const create_user = (user) => {
@@ -64,7 +65,7 @@ const update_user = (id, updates) => {
                 });
             });
         }else {            
-            reject("Something went wrong !");
+            reject({ Error: "Something went wrong !" });
         }
     });
 }
@@ -81,6 +82,48 @@ const delete_user = (id) => {
         }
     });
 }
+
+// upload avatar
+const upload_avatar = (user, file) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const buffer = await sharp(file.buffer).resize({ width: config.avatar.width, height: config.avatar.height }).png().toBuffer();
+            user.avatar = buffer;
+            await user.save();  // store upadted user data to db
+            //const data = await user_model_schema.findByIdAndUpdate(user._id, user, { new: true, runValidators: true});
+            resolve();
+        }catch(e) {
+            reject(e);
+        }
+    });
+};
+
+// delete avatar
+const delete_avatar = (user) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            user.avatar = undefined;
+            await user.save();  // store upadted user data to db
+            resolve();
+        }catch(e) {
+            reject(e);
+        }
+    });
+};
+
+// get avatar
+const get_avatar = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await user_model_schema.findById(id);
+            if(!user || !user.avatar)
+                resolve();
+            resolve(user);
+        }catch(e) {
+            reject(e);
+        }
+    });
+};
 
 // login user
 const login_user = (email, password) => {
@@ -150,6 +193,9 @@ module.exports = {
     get_user,
     update_user,
     delete_user,
+    upload_avatar,
+    delete_avatar,
+    get_avatar,
     login_user,
     logout_user
 }

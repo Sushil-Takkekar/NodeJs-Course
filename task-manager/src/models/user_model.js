@@ -50,7 +50,10 @@ const user_schema = new mongoose.Schema({
                 throw new Error('Error: Invalid age !');
         }
     },
-    tokens : [tokens_schema]
+    tokens : [tokens_schema],
+    avatar : {
+        type: Buffer
+    }
 }, {
     timestamps : true
 });
@@ -60,6 +63,7 @@ user_schema.methods.toJSON = function() {
     const user = this.toObject();
     delete user.password;
     delete user.tokens;
+    delete user.avatar;
     return user;
 }
 

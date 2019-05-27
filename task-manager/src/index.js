@@ -2,10 +2,11 @@ const express = require('express');
 require('./db/mongoose'); // establish the db connection
 const user_route = require('./routers/users-route');
 const task_route = require('./routers/tasks-route');
+const config = require('./config');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const site_maintenance_flag = false;
+const PORT = config.web_server_port;
+const site_maintenance_flag = config.site_maintenance_flag;
 
 // express middleware
 app.use((req, res, next) => {
@@ -25,18 +26,3 @@ app.use(task_route);
 app.listen(PORT, () => {
     console.log('Web-server started at port '+PORT);
 });
-
-/*
-const jwt = require('jsonwebtoken');
-const tmp = () => {
-    const token = jwt.sign({ _id:'1234', email: 'john@gmail.com', age: 0 }, 'mySecret', {expiresIn: '30 minutes'});
-    //console.log(token);
-    try {
-        const verify = jwt.verify(token, 'mySecret');
-        console.log(verify);
-    }catch(e) {
-        console.log(e);
-    }
-}
-tmp();
-*/
