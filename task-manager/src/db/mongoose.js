@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
-const db_name = "task-manager-api";
-const db_url = "mongodb://127.0.0.1:27017/"+db_name;
+const db_name = process.env.DB_NAME;
+const db_url = process.env.DB_URL+db_name;
 
 // connect to db
 mongoose.connect(db_url,{ 
     useNewUrlParser: true,
     useCreateIndex: true
-}).then((data) => {
+}).then(() => {
     console.log('Connected to db !');
 }).catch((err) => {
     console.log('Error: Failed to connect to db !');

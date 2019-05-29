@@ -1,11 +1,10 @@
-const config = require('../config');
 const jwt = require('jsonwebtoken');
 const user_model_schema = require('../models/user_model');
 
 const auth = async (req, res, next) => {
     try {
         const token = req.headers.authorization.replace('Bearer ','');
-        const decoded = jwt.verify(token, config.auth_secret); // replace Bearer from token if exists
+        const decoded = jwt.verify(token, process.env.JWT_AUTH_SECRET); // replace Bearer from token if exists
         const user = await user_model_schema.findOne({ _id : decoded._id, 'tokens.token' : token });
         if(!user) {
             throw new Error();

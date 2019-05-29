@@ -1,6 +1,5 @@
 const express = require('express');
 const router = new express.Router();
-const config = require('../config');
 const users = require('../db_operations/users_operations');
 const auth = require('../middleware/auth');
 const file_upload = require('../middleware/file_upload');
@@ -105,7 +104,7 @@ router.get('/users/:id/avatar', async (req, res) => {
         const user = await users.get_avatar(req.params.id);
         if(!user)
             return res.status(404).send({ Error : 'Avatar not found !' });
-        res.set('content-type', config.avatar.res_header);   // set header to return image in response
+        res.set('content-type', 'image/png');   // set header to return image in response
         res.send(user.avatar); // send image in response
     }catch(e) {
         res.status(500).send({ Error : 'Something went wrong !' });

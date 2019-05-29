@@ -1,9 +1,15 @@
-const config = require('../config');
 const user_model_schema = require('../models/user_model');
 const task_model_schema = require('../models/task_model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const sharp = require('sharp');
+const email = require('../email/account');
+
+const avatar = {
+    res_header : 'image/png',
+    width : 250,
+    height: 250
+}
 
 // create new user
 const create_user = (user) => {
@@ -12,6 +18,7 @@ const create_user = (user) => {
         bcrypt.hash(user_schema.password, 7).then((h_pwd) => {
             user_schema.password = h_pwd;
             user_schema.save().then(async (user) => {
+                email.sendWelcomeEmail(user.email, user.name);
                 const token = await user.generateAuthToken();   // call this model method using actual user object
                 resolve({ user, login: true, token});
                 resolve(user);
@@ -76,6 +83,7 @@ const delete_user = (id) => {
         try {
             await task_model_schema.deleteMany({ owner: id});
             const user = await user_model_schema.findByIdAndRemove(id);
+            email.sendAccDeleteEmail(user.email, user.name);
             resolve(user);
         }catch(e) {
             reject(e);
@@ -87,7 +95,7 @@ const delete_user = (id) => {
 const upload_avatar = (user, file) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const buffer = await sharp(file.buffer).resize({ width: config.avatar.width, height: config.avatar.height }).png().toBuffer();
+            const buffer = await sharp(file.buffer).resize({ width: avatar.width, height: avatar.height }).png().toBuffer();
             user.avatar = buffer;
             await user.save();  // store upadted user data to db
             //const data = await user_model_schema.findByIdAndUpdate(user._id, user, { new: true, runValidators: true});
@@ -167,7 +175,7 @@ const logout_user = (user, token) => {
 // Verify JWT auth token
 const verifyAuthToken = (token) => {
     try {
-        const user = jwt.verify(token.replace('Bearer ',''), config.auth_secret); // replace Bearer from token if exists
+        const user = jwt.verify(token.replace('Bearer ',''), process.env.JWT_AUTH_SECRET); // replace Bearer from token if exists
         return user;
     }catch(e) {
         return false

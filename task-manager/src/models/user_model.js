@@ -1,7 +1,5 @@
-const config = require('../config');
 const mongoose = require('mongoose');
 const validator = require('validator');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // define schema to store tokens
@@ -73,7 +71,7 @@ user_schema.methods.toJSON = function() {
 // Generate JWT auth token
 user_schema.methods.generateAuthToken = async function() {
     const user = this;
-    const token = jwt.sign({ _id:user._id.toString(), email:user.email}, config.auth_secret, {expiresIn: '1 day'});
+    const token = jwt.sign({ _id:user._id.toString(), email:user.email}, process.env.JWT_AUTH_SECRET, {expiresIn: '1 day'});
     return token;
 }
 
